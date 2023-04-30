@@ -2,13 +2,6 @@
 
 A Quick Start template for express app with typescript
 
-
-## Demo
-
-https://express-starter-ts.onrender.com/checkapi
-
-
-
 # Tech Stack
 
 ### NodeJS
@@ -19,9 +12,7 @@ https://express-starter-ts.onrender.com/checkapi
 
 ### Mongodb
 
-
-
-# Run Locally
+## Run Locally
 
 Clone the project
 
@@ -49,6 +40,6 @@ Start development server
   npm run dev
 ```
 
-# 🚀 About Me
+## 🚀 About Me
 
 ### I'm a really good dancer.
