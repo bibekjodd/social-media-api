@@ -1,17 +1,19 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError";
 import User from "../models/user.model";
 import { ErrorHandler } from "../lib/errorHandler";
+import {
+  LoginUserSchema,
+  RegisterUserSchema,
+} from "../lib/zod/userValidationSchema";
+import {
+  validateLoginUser,
+  validateRegisterUser,
+} from "../lib/zod/validateUser";
 
-type CreateUserBody = {
-  name: string;
-  email: string;
-  password: string;
-};
-export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
+export const createUser = catchAsyncError<unknown, unknown, RegisterUserSchema>(
   async (req, res, next) => {
+    validateRegisterUser(req.body);
     const { name, email, password } = req.body;
-    if (!name || !email || !password)
-      return next(new ErrorHandler("Please fill all the fields", 400));
 
     const user = await User.findOne({ email });
     if (user)
@@ -23,17 +25,10 @@ export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
   }
 );
 
-type LoginBody = {
-  email: string;
-  password: string;
-};
-
-export const login = catchAsyncError<unknown, unknown, LoginBody>(
+export const login = catchAsyncError<unknown, unknown, LoginUserSchema>(
   async (req, res, next) => {
+    validateLoginUser(req.body);
     const { email, password } = req.body;
-
-    if (!email || !password)
-      return next(new ErrorHandler("Please fill all the fields", 400));
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) return next(new ErrorHandler("Invalid user credintials", 404));
@@ -46,8 +41,8 @@ export const login = catchAsyncError<unknown, unknown, LoginBody>(
   }
 );
 
+// use middleware before this
 export const myProfile = catchAsyncError(async (req, res) => {
-  // use middleware before this
   const user = await User.findById(req.user._id);
   res.status(200).json({
     user,
