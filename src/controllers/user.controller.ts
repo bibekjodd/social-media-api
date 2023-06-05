@@ -1,6 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError";
-import User from "../models/User";
-import { ErrorHandler } from "../utils/errorHandler";
+import User from "../models/user.model";
+import { ErrorHandler } from "../lib/errorHandler";
 
 type CreateUserBody = {
   name: string;
@@ -16,7 +16,6 @@ export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
     const user = await User.findOne({ email });
     if (user)
       return next(new ErrorHandler("User with same email already exists", 409));
-
     const newUser = await User.create({ name, email, password });
     res.status(201).json({
       user: newUser,
