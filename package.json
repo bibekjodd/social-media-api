@@ -14,9 +14,10 @@
   "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ./src",
     "devstart": "npm run build && npm run start",
     "dev": "nodemon --exec ts-node --transpile-only src/app.ts",
-    "build": "tsc",
+    "build": "npm run lint && rimraf dist && tsc",
     "start": "node dist/app.js"
   },
   "keywords": [],

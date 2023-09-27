@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import devConsole from "./devConsole";
 
 const envSchema = z.object({
-  MONGO_URI: z.string().min(1),
+  MONGO_URI: z.string(),
 });
 export type EnvType = z.infer<typeof envSchema>;
 
@@ -20,6 +20,6 @@ export default function validateEnv() {
     envLoaded = true;
   } catch (error) {
     envLoaded = false;
-    devConsole("MONGO_URI is not loaded on environment".red);
+    devConsole("Some environment variables are not provided".red);
   }
 }

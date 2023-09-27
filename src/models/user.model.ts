@@ -1,25 +1,42 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 
-const userSchema = new mongoose.Schema(
+export interface IUser {
+  name: string;
+  email: string;
+  password?: string;
+  createdAt: NativeDate;
+  updatedAt: NativeDate;
+  _id: mongoose.Schema.Types.ObjectId;
+}
+
+type UserMethods = {
+  comparePassword: (password: string) => Promise<boolean>;
+};
+
+const userSchema = new mongoose.Schema<
+  IUser,
+  mongoose.Model<IUser>,
+  UserMethods
+>(
   {
     name: {
       type: String,
       required: [true, "Name is mandatory field"],
       trim: true,
-      minLength: [4, "Name must be at least 4 characters"],
-      maxLength: [30, "Name should not exceed 30 characters"],
+      minlength: [4, "Name must be at least 4 characters"],
+      maxlength: [30, "Name should not exceed 30 characters"],
     },
 
     email: {
       type: String,
       required: [true, "Email is mandatory field"],
-      minLength: [4, "Email must be at least 4 characters"],
-      maxLength: [30, "Email should not exceed 30 characters"],
-      validate: {
-        validator: validator.isEmail,
-        message: "Must provide valid email",
+      trim: true,
+      validate: (email: string) => {
+        if (!validator.isEmail(email)) {
+          throw new Error("Please provide valid email!");
+        }
       },
     },
 
@@ -27,8 +44,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is mandatory field"],
       select: false,
-      minLength: [6, "Password must be at least 6 characters"],
-      maxLength: [12, "Password should not exceed 12 characters"],
+      minlength: [6, "Password must be at least 6 characters"],
+      maxlength: [12, "Password should not exceed 12 characters"],
     },
   },
   { timestamps: true }
@@ -36,7 +53,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   if (this.isModified("password"))
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password || "", 10);
   next();
 });
 
@@ -45,14 +62,5 @@ userSchema.methods.comparePassword = async function (password: string) {
   return isMatch;
 };
 
-type UserMethods = {
-  comparePassword: (password: string) => Promise<boolean>;
-};
-
-export interface IUser
-  extends InferSchemaType<typeof userSchema>,
-    UserMethods,
-    mongoose.Document {}
-
-const User = mongoose.model<IUser>("User", userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

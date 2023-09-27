@@ -29,12 +29,13 @@ export default function initialConfig(app: Express) {
       next();
     })
   );
+
   app.get("/", (req, res) => {
     res.json({
       databaseConnected,
       envLoaded,
       env: process.env.NODE_ENV,
-      mongooseConnections: mongoose.connections.length,
+      databaseConnections: mongoose.connections.length,
     });
   });
   //

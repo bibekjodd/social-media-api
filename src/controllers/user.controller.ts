@@ -1,18 +1,14 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError";
 import User from "../models/user.model";
 import { ErrorHandler } from "../lib/errorHandler";
-import {
-  LoginUserSchema,
-  RegisterUserSchema,
-} from "../lib/zod/userValidationSchema";
-import {
-  validateLoginUser,
-  validateRegisterUser,
-} from "../lib/zod/validateUser";
 
-export const createUser = catchAsyncError<unknown, unknown, RegisterUserSchema>(
+type CreateUserBody = Partial<{
+  name: string;
+  email: string;
+  password: string;
+}>;
+export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
   async (req, res, next) => {
-    validateRegisterUser(req.body);
     const { name, email, password } = req.body;
 
     const user = await User.findOne({ email });
@@ -25,15 +21,15 @@ export const createUser = catchAsyncError<unknown, unknown, RegisterUserSchema>(
   }
 );
 
-export const login = catchAsyncError<unknown, unknown, LoginUserSchema>(
+type LoginUserBody = Omit<CreateUserBody, "name">;
+export const login = catchAsyncError<unknown, unknown, LoginUserBody>(
   async (req, res, next) => {
-    validateLoginUser(req.body);
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) return next(new ErrorHandler("Invalid user credintials", 404));
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(password || "");
     if (!isMatch)
       return next(new ErrorHandler("Invalid user credintials", 400));
 
