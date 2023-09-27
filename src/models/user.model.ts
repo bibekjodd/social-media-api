@@ -8,7 +8,7 @@ export interface IUser {
   password?: string;
   createdAt: NativeDate;
   updatedAt: NativeDate;
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
 }
 
 type UserMethods = {
