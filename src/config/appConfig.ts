@@ -31,7 +31,7 @@ export default function initialConfig(app: Express) {
   );
 
   app.get("/", (req, res) => {
-    res.json({
+    return res.json({
       databaseConnected,
       envLoaded,
       env: process.env.NODE_ENV,
