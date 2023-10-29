@@ -17,7 +17,7 @@ export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
     return res.status(201).json({
       user: newUser,
     });
-  },
+  }
 );
 
 type LoginUserBody = Omit<CreateUserBody, "name">;
@@ -32,7 +32,7 @@ export const login = catchAsyncError<unknown, unknown, LoginUserBody>(
     if (!isMatch) throw new CustomError("Invalid user credintials", 400);
 
     return res.json({ user });
-  },
+  }
 );
 
 // use middleware before this

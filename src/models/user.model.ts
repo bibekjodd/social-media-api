@@ -1,23 +1,29 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 
-export interface IUser {
+export type UserSchema = {
+  _id: Types.ObjectId;
+  createdAt: NativeDate;
+  updatedAt: NativeDate;
   name: string;
   email: string;
   password?: string;
-  createdAt: NativeDate;
-  updatedAt: NativeDate;
-  _id: mongoose.Types.ObjectId;
-}
+};
+
+export type TUser = Omit<UserSchema, "_id" | "createdAt" | "updatedAt"> & {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 type UserMethods = {
   comparePassword: (password: string) => Promise<boolean>;
 };
 
 const userSchema = new mongoose.Schema<
-  IUser,
-  mongoose.Model<IUser>,
+  UserSchema,
+  mongoose.Model<UserSchema>,
   UserMethods
 >(
   {
@@ -48,7 +54,7 @@ const userSchema = new mongoose.Schema<
       maxlength: [12, "Password should not exceed 12 characters"],
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 userSchema.pre("save", async function (next) {
