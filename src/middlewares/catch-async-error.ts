@@ -4,9 +4,9 @@ type CatchAsyncError = <
   Params = unknown,
   ResBody = unknown,
   ReqBody = unknown,
-  ReqQuery = unknown
+  ReqQuery = unknown,
 >(
-  passedFunction: RequestHandler<Params, ResBody, ReqBody, ReqQuery>
+  passedFunction: RequestHandler<Params, ResBody, ReqBody, ReqQuery>,
 ) => typeof passedFunction;
 
 export const catchAsyncError: CatchAsyncError = (passedFunction) => {

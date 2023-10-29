@@ -1,7 +1,7 @@
-import validateEnv from "../lib/validateEnv";
+import validateEnv from "../lib/validate-env";
 import express, { Express } from "express";
 import { connectDatabase } from "./database";
-import { catchAsyncError } from "../middlewares/catchAsyncError";
+import { catchAsyncError } from "../middlewares/catch-async-error";
 import mongoose from "mongoose";
 
 /**
@@ -27,7 +27,7 @@ export default function initialConfig(app: Express) {
       }
 
       next();
-    })
+    }),
   );
 
   app.get("/", (req, res) => {

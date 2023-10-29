@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import devConsole from "../lib/devConsole";
+import devConsole from "../lib/dev-console";
 
 global.databaseConnected = false;
 export const connectDatabase = async () => {

@@ -1,4 +1,4 @@
-import { EnvType } from "./src/lib/validateEnv";
+import { EnvType } from "./src/lib/validate-env";
 import { IUser } from "./src/models/user.model";
 
 export {};

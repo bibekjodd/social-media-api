@@ -1,6 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
-import devConsole from "./devConsole";
+import devConsole from "./dev-console";
 
 const envSchema = z.object({
   MONGO_URI: z.string(),
