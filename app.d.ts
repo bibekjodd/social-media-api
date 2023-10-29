@@ -1,5 +1,5 @@
 import { EnvType } from "./src/lib/validate-env";
-import { IUser } from "./src/models/user.model";
+import { UserSchema } from "./src/models/user.model";
 
 export {};
 declare global {
@@ -11,7 +11,7 @@ declare global {
 
   namespace Express {
     interface Request {
-      user: IUser;
+      user: UserSchema;
     }
   }
 

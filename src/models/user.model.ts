@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema<
       maxlength: [12, "Password should not exceed 12 characters"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.pre("save", async function (next) {
