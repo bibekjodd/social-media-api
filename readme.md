@@ -39,7 +39,3 @@ Start development server
 ```js
   npm run dev
 ```
-
-## 🚀 About Me
-
-### I'm a really good dancer.
