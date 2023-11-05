@@ -1,4 +1,4 @@
-import { EnvType } from './config/env.config';
+import { EnvType } from '@/config/env.config';
 
 export {};
 declare global {

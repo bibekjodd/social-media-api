@@ -1,5 +1,5 @@
-import { CustomError } from '../lib/custom-error';
-import { catchAsyncError } from '../middlewares/catch-async-error';
+import { CustomError } from '@/lib/custom-error';
+import { catchAsyncError } from '@/middlewares/catch-async-error';
 
 type CreateUserBody = {
   name: string;

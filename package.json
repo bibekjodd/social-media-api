@@ -14,10 +14,11 @@
   "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint ./src",
+    "lint": "eslint ./src && tsc",
     "devstart": "npm run build && npm run start",
-    "dev": "nodemon --exec ts-node --transpile-only src/app.ts",
-    "build": "npm run lint && rimraf dist && tsc",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register --transpile-only src/app.ts",
+    "tsc-build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
+    "build": "npm run lint && rimraf dist && npm run tsc-build",
     "start": "node dist/app.js",
     "format": "prettier --write ."
   },
@@ -26,11 +27,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "rimraf": "^5.0.5",
+    "tsconfig-paths": "^4.2.0",
+    "tscpaths": "^0.0.9",
     "zod": "^3.22.4"
   }
 }

@@ -1,10 +1,10 @@
-import 'colors';
-import express from 'express';
 import appConfig from './config/app.config';
 import devConsole from './lib/dev-console';
 import { handleErrorRequest } from './middlewares/handle-error-request';
 import { notFound } from './middlewares/not-found';
 import userRoute from './routes/user.route';
+import 'colors';
+import express from 'express';
 
 // -------- app initialization --------
 const app = express();

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "lib": ["es2021"],
     "module": "NodeNext",
     "target": "es2021",
@@ -8,6 +9,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "nodenext"
+    "moduleResolution": "nodenext",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
