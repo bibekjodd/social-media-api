@@ -1,22 +1,22 @@
-import express from "express";
-import "colors";
-import { error } from "./middlewares/error";
-import { notFound } from "./middlewares/not-found";
-import userRoute from "./routes/user.route";
-import devConsole from "./lib/dev-console";
-import initialConfig from "./config/app-config";
+import 'colors';
+import express from 'express';
+import appConfig from './config/app.config';
+import devConsole from './lib/dev-console';
+import { handleErrorRequest } from './middlewares/handle-error-request';
+import { notFound } from './middlewares/not-found';
+import userRoute from './routes/user.route';
 
 // -------- app initialization --------
 const app = express();
-initialConfig(app);
+appConfig(app);
 
 // -------- routes --------
-app.use("/api/v1", userRoute);
+app.use('/api/v1', userRoute);
 
 app.use(notFound);
-app.use(error);
-app.listen(process.env.PORT || 5000, () => {
-  devConsole(
-    `Server listening at http://localhost:${process.env.PORT || 5000}`.yellow,
-  );
+app.use(handleErrorRequest);
+
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  devConsole(`Server listening at http://localhost:${port}`.yellow);
 });

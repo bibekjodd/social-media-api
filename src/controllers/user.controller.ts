@@ -1,44 +1,23 @@
-import { catchAsyncError } from "../middlewares/catch-async-error";
-import User from "../models/user.model";
-import { CustomError } from "../lib/custom-error";
+import { CustomError } from '../lib/custom-error';
+import { catchAsyncError } from '../middlewares/catch-async-error';
 
-type CreateUserBody = Partial<{
+type CreateUserBody = {
   name: string;
   email: string;
   password: string;
-}>;
+  avatar: string;
+};
 export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
-  async (req, res) => {
-    const { name, email, password } = req.body;
+  async (req, res, next) => {
+    const { name, email, password, avatar } = req.body;
+    if (!name || !email || !password || !avatar) {
+      return next(new CustomError('Please fill all the fields'));
+    }
 
-    const user = await User.findOne({ email });
-    if (user) throw new CustomError("User with same email already exists", 409);
-    const newUser = await User.create({ name, email, password });
-    return res.status(201).json({
-      user: newUser,
-    });
-  },
+    return res.json({ message: 'user created successfully' });
+  }
 );
 
-type LoginUserBody = Omit<CreateUserBody, "name">;
-export const login = catchAsyncError<unknown, unknown, LoginUserBody>(
-  async (req, res) => {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) throw new CustomError("Invalid user credintials", 404);
-
-    const isMatch = await user.comparePassword(password || "");
-    if (!isMatch) throw new CustomError("Invalid user credintials", 400);
-
-    return res.json({ user });
-  },
-);
-
-// use middleware before this
-export const myProfile = catchAsyncError(async (req, res) => {
-  const user = await User.findById(req.user._id);
-  return res.json({
-    user,
-  });
+export const getAllUsers = catchAsyncError(async (req, res) => {
+  return res.json({ users: ['elon', 'obama'] });
 });
