@@ -1,6 +1,5 @@
-import { config } from 'dotenv';
-import express, { Express } from 'express';
-import { validateEnv } from './env.config';
+import express, { type Express } from 'express';
+import { env } from './env.config';
 
 /**
  * - Initial config for app
@@ -9,20 +8,16 @@ import { validateEnv } from './env.config';
  *
  * - crash app if required `env` is not provided
  */
-export default function appConfig(app: Express) {
+export default function initialConfig(app: Express) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
-  if (process.env.NODE_ENV !== 'production') {
-    config({ path: '.env' });
-  }
-
-  validateEnv();
 
   app.get('/', (req, res) => {
     return res.json({
       message: 'Api is running fine...',
-      env: process.env.NODE_ENV
+      env: env.NODE_ENV,
+      date: new Date().toISOString(),
+      ANY_OTHER_ENV: env.ANY_OTHER_ENV || null
     });
   });
   //

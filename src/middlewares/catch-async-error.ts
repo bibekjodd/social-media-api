@@ -1,5 +1,5 @@
 import { CustomError } from '@/lib/custom-error';
-import { RequestHandler } from 'express';
+import { type RequestHandler } from 'express';
 
 type CatchAsyncError = <
   Params = unknown,

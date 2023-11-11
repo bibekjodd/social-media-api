@@ -1,5 +1,7 @@
+import { env } from '@/config/env.config';
+
 export default function devConsole(...args: string[]) {
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV !== 'production') {
     console.log(args.join(' '));
   }
 }
