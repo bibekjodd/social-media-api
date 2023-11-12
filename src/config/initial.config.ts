@@ -3,15 +3,11 @@ import { env } from './env.config';
 
 /**
  * - Initial config for app
- *
- * - validate `process.env`
- *
  * - crash app if required `env` is not provided
  */
 export default function initialConfig(app: Express) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
   app.get('/', (req, res) => {
     return res.json({
       message: 'Api is running fine...',
