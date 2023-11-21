@@ -68,6 +68,37 @@ export const getUserProfile = catchAsyncError(async (req, res) => {
   return res.json({ user: { ...req.user, password: undefined } });
 });
 
+type UpdateProfileBody = {
+  name?: string;
+  email?: string;
+  image?: string;
+};
+export const updateProfile = catchAsyncError<
+  unknown,
+  unknown,
+  UpdateProfileBody
+>(async (req, res) => {
+  const { name, email, image } = req.body;
+  if (!name && !email && !image)
+    return res.json({
+      user: req.user,
+      message: 'Profile updated successfully'
+    });
+
+  z.string().email('Invalid email provided').optional().parse(email);
+
+  const [user] = await db
+    .update(Users)
+    .set({
+      name: name || undefined,
+      email: email || undefined,
+      image: image || undefined
+    })
+    .returning();
+
+  return res.json({ user, message: 'Profile updated successfully' });
+});
+
 export const deleteProfile = catchAsyncError(async (req, res) => {
   await db.delete(Users).where(eq(Users.id, req.user.id));
   return res.json({ message: 'Account deleted successfully' });
