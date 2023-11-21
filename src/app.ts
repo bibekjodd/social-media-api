@@ -1,18 +1,20 @@
 import 'colors';
 import express from 'express';
+import { env } from './config/env.config';
 import initialConfig from './config/initial.config';
 import devConsole from './lib/dev-console';
 import { handleErrorRequest } from './middlewares/handle-error-request';
 import { notFound } from './middlewares/not-found';
-import userRoute from './routes/user.route';
-import { env } from './config/env.config';
+import { router as postRouter } from './routes/post.route';
+import userRouter from './routes/user.route';
 
 // -------- app initialization --------
 const app = express();
 initialConfig(app);
 
 // -------- routes --------
-app.use('/api', userRoute);
+app.use('/api', userRouter);
+app.use('/api', postRouter);
 
 app.use(notFound);
 app.use(handleErrorRequest);

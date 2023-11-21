@@ -9,7 +9,7 @@ export const Posts = pgTable(
       .notNull()
       .primaryKey()
       .$defaultFn(() => createId()),
-    title: text('title'),
+    caption: text('caption'),
     image: text('image'),
     userId: text('userId').notNull(),
     createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
