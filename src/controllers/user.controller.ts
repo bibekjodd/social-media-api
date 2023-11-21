@@ -9,8 +9,9 @@ import {
   generateResetPasswordToken,
   hashPassword
 } from '@/lib/utils';
+import { validateImageUrl } from '@/lib/validators';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
-import { Users, type User } from '@/schema/user.schema';
+import { Users } from '@/schema/user.schema';
 import crypto from 'crypto';
 import { and, eq, gte, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
@@ -38,10 +39,16 @@ export const searchUsers = catchAsyncError<
   return res.json({ users });
 });
 
-type RegisterUserBody = Omit<Partial<User>, 'id'>;
+type RegisterUserBody = {
+  name?: string;
+  email?: string;
+  password?: string;
+  image?: string;
+};
 export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
   async (req, res, next) => {
     const { email, image, name, password } = req.body;
+    validateImageUrl(image);
     if (!email || !name || !password)
       return next(new CustomError('Please provide all the required fields!'));
     z.string().email('Invalid email provided!').parse(email);
@@ -113,6 +120,8 @@ export const updateProfile = catchAsyncError<
       user: req.user,
       message: 'Profile updated successfully'
     });
+
+  validateImageUrl(image);
 
   z.string().email('Invalid email provided').optional().parse(email);
 
