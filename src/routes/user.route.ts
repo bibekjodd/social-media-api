@@ -5,6 +5,7 @@ import {
   loginUser,
   registerUser,
   resetPassword,
+  searchUsers,
   updatePassword,
   updateProfile
 } from '@/controllers/user.controller';
@@ -13,6 +14,7 @@ import express from 'express';
 
 const router = express.Router();
 
+router.get('/search', searchUsers);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router

@@ -5,15 +5,38 @@ import {
   comparePassword,
   cookieOptions,
   filterUser,
-  generateResetPasswordToken,
   generateCookieToken,
+  generateResetPasswordToken,
   hashPassword
 } from '@/lib/utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Users, type User } from '@/schema';
 import crypto from 'crypto';
-import { and, eq, gte } from 'drizzle-orm';
+import { and, eq, gte, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
+
+export const searchUsers = catchAsyncError<
+  unknown,
+  unknown,
+  unknown,
+  { q?: string; limit?: string }
+>(async (req, res) => {
+  const q = `%${req.query.q || ''}%`;
+  const limit = Number(req.query.limit) || 10;
+
+  const users = await db
+    .select({
+      id: Users.id,
+      name: Users.name,
+      email: Users.email,
+      image: Users.image
+    })
+    .from(Users)
+    .where(or(ilike(Users.name, q), ilike(Users.email, q)))
+    .limit(limit);
+
+  return res.json({ users });
+});
 
 type RegisterUserBody = Omit<Partial<User>, 'id'>;
 export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
