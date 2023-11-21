@@ -1,5 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
-import { date, pgTable, text, unique } from 'drizzle-orm/pg-core';
+import { date, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
 export const Users = pgTable(
   'users',
@@ -14,7 +14,7 @@ export const Users = pgTable(
     image: text('image'),
     resetPasswordToken: text('resetPasswordToken'),
     resetPasswordExpire: date('resetPasswordExpire', { mode: 'string' }),
-    createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
+    createdAt: timestamp('createdAt', { mode: 'string' }).notNull().defaultNow()
   },
   function constraints(table) {
     return {

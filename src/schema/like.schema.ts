@@ -1,5 +1,11 @@
 import { createId } from '@paralleldrive/cuid2';
-import { date, foreignKey, index, pgTable, text } from 'drizzle-orm/pg-core';
+import {
+  foreignKey,
+  index,
+  pgTable,
+  text,
+  timestamp
+} from 'drizzle-orm/pg-core';
 import { Comments } from './comment.schema';
 import { Posts } from './post.schema';
 import { Users } from './user.schema';
@@ -14,7 +20,7 @@ export const Likes = pgTable(
     userId: text('userId').notNull(),
     postId: text('postId'),
     commentId: text('commentId'),
-    createdAt: date('createdAt').notNull().defaultNow()
+    createdAt: timestamp('createdAt').notNull().defaultNow()
   },
   function constraints(table) {
     return {

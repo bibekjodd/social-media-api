@@ -2,6 +2,7 @@ import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Posts } from '@/schema/post.schema';
+import { Users } from '@/schema/user.schema';
 import { desc, eq } from 'drizzle-orm';
 
 type GetPostsQuery = {
@@ -25,8 +26,20 @@ export const getPosts = catchAsyncError<
   const userId = req.query.userId;
 
   const query = db
-    .select()
+    .select({
+      id: Posts.id,
+      caption: Posts.caption,
+      image: Posts.image,
+      createdAt: Posts.createdAt,
+      author: {
+        id: Users.id,
+        name: Users.name,
+        email: Users.email,
+        image: Users.image
+      }
+    })
     .from(Posts)
+    .leftJoin(Users, eq(Posts.userId, Users.id))
     .limit(pageSize)
     .offset(offset)
     .orderBy(desc(Posts.createdAt));

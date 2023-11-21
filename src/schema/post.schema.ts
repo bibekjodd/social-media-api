@@ -1,5 +1,11 @@
 import { createId } from '@paralleldrive/cuid2';
-import { date, foreignKey, index, pgTable, text } from 'drizzle-orm/pg-core';
+import {
+  foreignKey,
+  index,
+  pgTable,
+  text,
+  timestamp
+} from 'drizzle-orm/pg-core';
 import { Users } from './user.schema';
 
 export const Posts = pgTable(
@@ -12,7 +18,7 @@ export const Posts = pgTable(
     caption: text('caption'),
     image: text('image'),
     userId: text('userId').notNull(),
-    createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
+    createdAt: timestamp('createdAt', { mode: 'string' }).notNull().defaultNow()
   },
   function constaints(table) {
     return {
