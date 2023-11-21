@@ -67,3 +67,8 @@ export const loginUser = catchAsyncError<unknown, unknown, LoginUserBody>(
 export const getUserProfile = catchAsyncError(async (req, res) => {
   return res.json({ user: { ...req.user, password: undefined } });
 });
+
+export const deleteProfile = catchAsyncError(async (req, res) => {
+  await db.delete(Users).where(eq(Users.id, req.user.id));
+  return res.json({ message: 'Account deleted successfully' });
+});

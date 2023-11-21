@@ -1,4 +1,5 @@
 import {
+  deleteProfile,
   getUserProfile,
   loginUser,
   registerUser
@@ -10,6 +11,9 @@ const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.route('/profile').get(isAuthenticatedUser, getUserProfile);
+router
+  .route('/profile')
+  .get(isAuthenticatedUser, getUserProfile)
+  .delete(isAuthenticatedUser, deleteProfile);
 
 export default router;
