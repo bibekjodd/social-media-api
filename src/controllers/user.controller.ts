@@ -6,12 +6,13 @@ import {
   cookieOptions,
   filterUser,
   generateResetPasswordToken,
-  generateToken,
+  generateCookieToken,
   hashPassword
 } from '@/lib/utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Users, type User } from '@/schema';
-import { eq } from 'drizzle-orm';
+import crypto from 'crypto';
+import { and, eq, gte } from 'drizzle-orm';
 import { z } from 'zod';
 
 type RegisterUserBody = Omit<Partial<User>, 'id'>;
@@ -41,7 +42,7 @@ export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
       return next(new CustomError('Could not register user'));
     }
 
-    const token = generateToken(user.id);
+    const token = generateCookieToken(user.id);
     return res
       .cookie('token', token, cookieOptions)
       .json({ user: filterUser(user) });
@@ -62,7 +63,7 @@ export const loginUser = catchAsyncError<unknown, unknown, LoginUserBody>(
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) return next(new CustomError('Invalid user credentials!'));
 
-    const token = generateToken(user.id);
+    const token = generateCookieToken(user.id);
     return res
       .cookie('token', token, cookieOptions)
       .json({ user: filterUser(user) });
@@ -198,6 +199,52 @@ export const forgotPassword = catchAsyncError<
     mail: email,
     subject: 'Password Recovery for social media app'
   });
+});
+
+export const resetPassword = catchAsyncError<
+  unknown,
+  unknown,
+  { newPassword?: string },
+  { token?: string }
+>(async (req, res, next) => {
+  const { newPassword } = req.body;
+  const { token } = req.query;
+  if (!token) return next(new CustomError('Please provide valid token'));
+  if (!newPassword) return next(new CustomError('Please provide new password'));
+
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  const [user] = await db
+    .select()
+    .from(Users)
+    .where(
+      and(
+        eq(Users.resetPasswordToken, resetPasswordToken),
+        gte(Users.resetPasswordExpire, new Date().toISOString())
+      )
+    )
+    .limit(1);
+
+  if (!user) {
+    return next(new CustomError('Invalid token or token expired'));
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await db
+    .update(Users)
+    .set({
+      password: hashedPassword,
+      resetPasswordExpire: null,
+      resetPasswordToken: null
+    })
+    .where(eq(Users.id, user.id));
+
+  const cookieToken = generateCookieToken(user.id);
+  return res
+    .cookie('token', cookieToken, cookieOptions)
+    .json({ user: filterUser(user) });
 });
 
 export const deleteProfile = catchAsyncError(async (req, res) => {

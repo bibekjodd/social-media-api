@@ -25,7 +25,7 @@ export const cookieOptions: CookieOptions = {
   httpOnly: true
 };
 
-export const generateToken = (id: string): string => {
+export const generateCookieToken = (id: string): string => {
   const token = jwt.sign({ id }, env.JWT_SECRET);
   return token;
 };
