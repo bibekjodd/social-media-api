@@ -94,9 +94,40 @@ export const updateProfile = catchAsyncError<
       email: email || undefined,
       image: image || undefined
     })
+    .where(eq(Users.id, req.user.id))
     .returning();
 
   return res.json({ user, message: 'Profile updated successfully' });
+});
+
+type UpdatePasswordBody = {
+  oldPassword?: string;
+  newPassword?: string;
+};
+export const updatePassword = catchAsyncError<
+  unknown,
+  unknown,
+  UpdatePasswordBody
+>(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword)
+    return next(new CustomError('Please provide both old and new passwords'));
+
+  const isMatch = await comparePassword(oldPassword, req.user.password);
+  if (!isMatch) return next(new CustomError("Old password doesn't match"));
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  const [user] = await db
+    .update(Users)
+    .set({ password: hashedPassword })
+    .where(eq(Users.id, req.user.id))
+    .returning();
+
+  if (!user) return next(new CustomError("Couldn't update password"));
+
+  return res.json({ user, message: 'Password updated successfully' });
 });
 
 export const deleteProfile = catchAsyncError(async (req, res) => {

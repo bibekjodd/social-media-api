@@ -3,6 +3,7 @@ import {
   getUserProfile,
   loginUser,
   registerUser,
+  updatePassword,
   updateProfile
 } from '@/controllers/user.controller';
 import { isAuthenticatedUser } from '@/middlewares/auth';
@@ -17,5 +18,7 @@ router
   .get(isAuthenticatedUser, getUserProfile)
   .put(isAuthenticatedUser, updateProfile)
   .delete(isAuthenticatedUser, deleteProfile);
+
+router.route('/password').put(isAuthenticatedUser, updatePassword);
 
 export default router;
