@@ -8,12 +8,11 @@ import { env } from './env.config';
 export default function initialConfig(app: Express) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.get('/', (req, res) => {
+  app.get('/', async (req, res) => {
     return res.json({
       message: 'Api is running fine...',
       env: env.NODE_ENV,
-      date: new Date().toISOString(),
-      ANY_OTHER_ENV: env.ANY_OTHER_ENV || null
+      date: new Date().toISOString()
     });
   });
   //

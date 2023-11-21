@@ -11,8 +11,8 @@ const envSchema = z.object({
     .readonly()
     .default('development')
     .optional(),
-  PORT: z.string().optional().readonly(),
-  ANY_OTHER_ENV: z.string().optional()
+  DATABASE_URL: z.string().readonly(),
+  PORT: z.string().optional().readonly()
 });
 export const env = envSchema.parse(process.env);
 export type EnvType = z.infer<typeof envSchema>;

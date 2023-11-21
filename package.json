@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "social-media-api",
   "version": "1.0.0",
   "main": "dist/app.js",
   "type": "module",
@@ -13,16 +13,20 @@
     "dev:esbuild": "pnpm run build --watch",
     "dev": "run-p dev:*",
     "format": "prettier --write .",
-    "all": "pnpm lint && pnpm format && pnpm build"
+    "all": "pnpm lint && pnpm format && pnpm build",
+    "migrate": "drizzle-kit generate:pg --schema=./src/schema --out=./drizzle"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
     "colors": "^1.4.0",
     "dotenv": "^16.3.1",
+    "drizzle-orm": "^0.29.0",
     "express": "^4.18.2",
+    "postgres": "^3.4.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -30,6 +34,7 @@
     "@types/node": "^20.8.9",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
+    "drizzle-kit": "^0.20.4",
     "esbuild": "^0.19.5",
     "eslint": "^8.52.0",
     "npm-run-all": "^4.1.5",
