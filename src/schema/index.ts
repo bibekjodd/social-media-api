@@ -12,6 +12,23 @@ export const Users = pgTable('users', {
   image: text('image'),
   resetPasswordToken: text('resetPasswordToken'),
   resetPasswordExpire: date('resetPasswordExpire', { mode: 'string' }),
-  createdAt: date('createdAt', { mode: 'string' }).defaultNow()
+  createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
 });
 export type User = typeof Users.$inferSelect;
+
+export const Posts = pgTable('posts', {
+  id: text('id')
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text('title'),
+  image: text('image'),
+  userId: text('userId')
+    .notNull()
+    .references(() => Users.id),
+  postId: text('postId')
+    .notNull()
+    .references(() => Users.id),
+  createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
+});
+export type Post = typeof Posts.$inferSelect;
