@@ -1,5 +1,6 @@
 import {
   deleteProfile,
+  forgotPassword,
   getUserProfile,
   loginUser,
   registerUser,
@@ -20,5 +21,6 @@ router
   .delete(isAuthenticatedUser, deleteProfile);
 
 router.route('/password').put(isAuthenticatedUser, updatePassword);
+router.route('/password/forgot').post(forgotPassword);
 
 export default router;

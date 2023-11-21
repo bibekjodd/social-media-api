@@ -1,5 +1,7 @@
 import { env } from '@/config/env.config';
+import type { User } from '@/schema';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import type { CookieOptions } from 'express';
 import jwt from 'jsonwebtoken';
 
@@ -26,4 +28,29 @@ export const cookieOptions: CookieOptions = {
 export const generateToken = (id: string): string => {
   const token = jwt.sign({ id }, env.JWT_SECRET);
   return token;
+};
+
+export const filterUser = (user: User) => {
+  return {
+    ...user,
+    password: undefined,
+    resetPasswordExpire: undefined,
+    resetPasswordToken: undefined
+  };
+};
+
+export const generateResetPasswordToken = (): {
+  token: string;
+  resetPasswordToken: string;
+  resetPasswordExpire: string;
+} => {
+  const token = crypto.randomBytes(20).toString('hex');
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  const resetPasswordExpire = new Date(
+    Date.now() + 15 * 60 * 1000
+  ).toISOString();
+  return { token, resetPasswordToken, resetPasswordExpire };
 };

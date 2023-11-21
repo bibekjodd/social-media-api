@@ -1,8 +1,11 @@
 import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
+import sendMail from '@/lib/send-mail';
 import {
   comparePassword,
   cookieOptions,
+  filterUser,
+  generateResetPasswordToken,
   generateToken,
   hashPassword
 } from '@/lib/utils';
@@ -39,7 +42,9 @@ export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
     }
 
     const token = generateToken(user.id);
-    return res.cookie('token', token, cookieOptions).json({ user });
+    return res
+      .cookie('token', token, cookieOptions)
+      .json({ user: filterUser(user) });
   }
 );
 
@@ -60,12 +65,12 @@ export const loginUser = catchAsyncError<unknown, unknown, LoginUserBody>(
     const token = generateToken(user.id);
     return res
       .cookie('token', token, cookieOptions)
-      .json({ user: { ...user, password: undefined } });
+      .json({ user: filterUser(user) });
   }
 );
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
-  return res.json({ user: { ...req.user, password: undefined } });
+  return res.json({ user: filterUser(req.user) });
 });
 
 type UpdateProfileBody = {
@@ -77,7 +82,7 @@ export const updateProfile = catchAsyncError<
   unknown,
   unknown,
   UpdateProfileBody
->(async (req, res) => {
+>(async (req, res, next) => {
   const { name, email, image } = req.body;
   if (!name && !email && !image)
     return res.json({
@@ -97,7 +102,14 @@ export const updateProfile = catchAsyncError<
     .where(eq(Users.id, req.user.id))
     .returning();
 
-  return res.json({ user, message: 'Profile updated successfully' });
+  if (!user) {
+    return next(new CustomError('Could not update profile'));
+  }
+
+  return res.json({
+    user: filterUser(user),
+    message: 'Profile updated successfully'
+  });
 });
 
 type UpdatePasswordBody = {
@@ -127,7 +139,65 @@ export const updatePassword = catchAsyncError<
 
   if (!user) return next(new CustomError("Couldn't update password"));
 
-  return res.json({ user, message: 'Password updated successfully' });
+  return res.json({
+    user: filterUser(user),
+    message: 'Password updated successfully'
+  });
+});
+
+type ForgotPasswordBody = { email: string; passwordResetPageUrl?: string };
+export const forgotPassword = catchAsyncError<
+  unknown,
+  unknown,
+  ForgotPasswordBody
+>(async (req, res, next) => {
+  const { email } = req.body;
+  const passwordResetPageUrl =
+    req.body.passwordResetPageUrl || 'http://localhost:5000/api/password/reset';
+
+  z.string({ required_error: 'Please provide email' })
+    .email('Invalid email')
+    .parse(email);
+
+  const [userExists] = await db
+    .select()
+    .from(Users)
+    .where(eq(Users.email, email))
+    .limit(1);
+
+  if (!userExists)
+    return next(new CustomError("User with this email doesn't exist"));
+
+  const { token, resetPasswordToken, resetPasswordExpire } =
+    generateResetPasswordToken();
+
+  await db
+    .update(Users)
+    .set({ resetPasswordExpire, resetPasswordToken })
+    .where(eq(Users.email, email));
+
+  res.json({
+    message: `Password reset link sent to ${email}. Link will expire after 15 minutes!`
+  });
+
+  const passwordResetLink = `${passwordResetPageUrl}?token=${token}`;
+  const html = `
+  <div>
+    <h3>
+      Password recovery for social media app
+    </h3>
+    <p>Update within 15 minutes before link expires</p>
+    <a href='${passwordResetLink}' target='_blank' rel='noopener noreferrer'>
+      Click here to reset Password
+    </a>
+  </div>
+  `;
+
+  sendMail({
+    html,
+    mail: email,
+    subject: 'Password Recovery for social media app'
+  });
 });
 
 export const deleteProfile = catchAsyncError(async (req, res) => {

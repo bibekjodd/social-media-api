@@ -13,6 +13,11 @@ const envSchema = z.object({
     .optional(),
   DATABASE_URL: z.string().readonly(),
   JWT_SECRET: z.string().readonly(),
+
+  SMTP_SERVICE: z.string().readonly(),
+  SMTP_MAIL: z.string().readonly(),
+  SMTP_PASS: z.string().readonly(),
+
   PORT: z.string().optional().readonly()
 });
 export const env = envSchema.parse(process.env);
