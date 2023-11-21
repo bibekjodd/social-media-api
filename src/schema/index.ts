@@ -11,3 +11,4 @@ export const Users = pgTable('users', {
   password: text('password').notNull(),
   image_url: text('image_url')
 });
+export type User = typeof Users.$inferSelect;

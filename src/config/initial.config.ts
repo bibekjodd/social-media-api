@@ -8,6 +8,7 @@ import { env } from './env.config';
 export default function initialConfig(app: Express) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
   app.get('/', async (req, res) => {
     return res.json({
       message: 'Api is running fine...',

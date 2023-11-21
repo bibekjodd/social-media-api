@@ -12,7 +12,7 @@ const app = express();
 initialConfig(app);
 
 // -------- routes --------
-app.use('/api/v1', userRoute);
+app.use('/api', userRoute);
 
 app.use(notFound);
 app.use(handleErrorRequest);

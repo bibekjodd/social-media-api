@@ -1,23 +1,39 @@
+import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
+import { cookieOptions, generateToken, hashPassword } from '@/lib/utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
+import { Users, type User } from '@/schema';
+import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 
-type CreateUserBody = {
-  name: string;
-  email: string;
-  password: string;
-  avatar: string;
-};
-export const createUser = catchAsyncError<unknown, unknown, CreateUserBody>(
+type RegisterUserBody = Omit<User, 'id'>;
+export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
   async (req, res, next) => {
-    const { name, email, password, avatar } = req.body;
-    if (!name || !email || !password || !avatar) {
-      return next(new CustomError('Please fill all the fields'));
+    const { email, image_url, name, password } = req.body;
+    if (!email || !name || !password)
+      return next(new CustomError('Please provide all the required fields!'));
+    z.string().email('Invalid email provided!').parse(email);
+
+    const [userExists] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.email, email))
+      .limit(1);
+    if (userExists) {
+      return next(new CustomError('User with same email already exists!'));
     }
 
-    return res.json({ message: 'user created successfully' });
+    const hashedPassword = await hashPassword(password);
+    const [user] = await db
+      .insert(Users)
+      .values({ name, email, password: hashedPassword, image_url })
+      .returning();
+
+    if (!user) {
+      return next(new CustomError('Could not register user'));
+    }
+
+    const token = generateToken(user.id);
+    return res.cookie('token', token, cookieOptions).json({ user });
   }
 );
-
-export const getAllUsers = catchAsyncError(async (req, res) => {
-  return res.json({ users: ['elon', 'obama'] });
-});
