@@ -32,3 +32,19 @@ export const Posts = pgTable('posts', {
   createdAt: date('createdAt', { mode: 'string' }).notNull().defaultNow()
 });
 export type Post = typeof Posts.$inferSelect;
+
+export const Comments = pgTable('comments', {
+  id: text('id')
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  comment: text('comment').notNull(),
+  userId: text('userId')
+    .notNull()
+    .references(() => Users.id),
+  postId: text('postId')
+    .notNull()
+    .references(() => Posts.id),
+  createdAt: date('createdAt', { mode: 'string' }).defaultNow()
+});
+export type Comment = typeof Comments.$inferSelect;
