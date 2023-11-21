@@ -11,6 +11,7 @@ export const Users = pgTable('users', {
   password: text('password').notNull(),
   image: text('image'),
   resetPasswordToken: text('resetPasswordToken'),
-  resetPasswordExpire: date('resetPasswordExpire', { mode: 'string' })
+  resetPasswordExpire: date('resetPasswordExpire', { mode: 'string' }),
+  createdAt: date('createdAt', { mode: 'string' }).defaultNow()
 });
 export type User = typeof Users.$inferSelect;
