@@ -10,7 +10,7 @@ import {
   hashPassword
 } from '@/lib/utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
-import { Users, type User } from '@/schema';
+import { Users, type User } from '@/schema/user.schema';
 import crypto from 'crypto';
 import { and, eq, gte, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';

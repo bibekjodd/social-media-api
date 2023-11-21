@@ -1,5 +1,5 @@
 import { env } from '@/config/env.config';
-import type { User } from '@/schema';
+import type { User } from '@/schema/user.schema';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import type { CookieOptions } from 'express';

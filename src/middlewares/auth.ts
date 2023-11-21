@@ -1,10 +1,10 @@
-import { CustomError } from '@/lib/custom-error';
-import { catchAsyncError } from './catch-async-error';
-import jwt from 'jsonwebtoken';
-import { env } from '@/config/env.config';
 import { db } from '@/config/database';
-import { Users } from '@/schema';
+import { env } from '@/config/env.config';
+import { CustomError } from '@/lib/custom-error';
+import { Users } from '@/schema/user.schema';
 import { eq } from 'drizzle-orm';
+import jwt from 'jsonwebtoken';
+import { catchAsyncError } from './catch-async-error';
 
 export const isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   const token = req.cookies?.token;

@@ -1,5 +1,5 @@
 import { EnvType } from '@/config/env.config';
-import type { User } from './schema';
+import type { User } from './schema/user.schema';
 
 export {};
 declare global {

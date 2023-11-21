@@ -14,7 +14,7 @@
     "dev": "run-p dev:*",
     "format": "prettier --write .",
     "all": "pnpm lint && pnpm format && pnpm build",
-    "migrate": "drizzle-kit generate:pg --schema=./src/schema --out=./drizzle"
+    "migrate": "drizzle-kit generate:pg --schema=./src/schema/*.ts --out=./drizzle"
   },
   "keywords": [],
   "author": "",
