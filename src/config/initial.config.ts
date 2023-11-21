@@ -1,5 +1,6 @@
 import express, { type Express } from 'express';
 import { env } from './env.config';
+import cookieParser from 'cookie-parser';
 
 /**
  * - Initial config for app
@@ -8,6 +9,7 @@ import { env } from './env.config';
 export default function initialConfig(app: Express) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   app.get('/', async (req, res) => {
     return res.json({

@@ -14,7 +14,7 @@ import { z } from 'zod';
 type RegisterUserBody = Omit<Partial<User>, 'id'>;
 export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
   async (req, res, next) => {
-    const { email, image_url, name, password } = req.body;
+    const { email, image, name, password } = req.body;
     if (!email || !name || !password)
       return next(new CustomError('Please provide all the required fields!'));
     z.string().email('Invalid email provided!').parse(email);
@@ -31,7 +31,7 @@ export const registerUser = catchAsyncError<unknown, unknown, RegisterUserBody>(
     const hashedPassword = await hashPassword(password);
     const [user] = await db
       .insert(Users)
-      .values({ name, email, password: hashedPassword, image_url })
+      .values({ name, email, password: hashedPassword, image })
       .returning();
 
     if (!user) {
@@ -58,6 +58,12 @@ export const loginUser = catchAsyncError<unknown, unknown, LoginUserBody>(
     if (!isMatch) return next(new CustomError('Invalid user credentials!'));
 
     const token = generateToken(user.id);
-    return res.cookie('token', token, cookieOptions).json({ user });
+    return res
+      .cookie('token', token, cookieOptions)
+      .json({ user: { ...user, password: undefined } });
   }
 );
+
+export const getUserProfile = catchAsyncError(async (req, res) => {
+  return res.json({ user: { ...req.user, password: undefined } });
+});
