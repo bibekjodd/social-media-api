@@ -5,6 +5,7 @@ import initialConfig from './config/initial.config';
 import devConsole from './lib/dev-console';
 import { handleErrorRequest } from './middlewares/handle-error-request';
 import { notFound } from './middlewares/not-found';
+import { router as commentRouter } from './routes/comment.route';
 import { router as postRouter } from './routes/post.route';
 import userRouter from './routes/user.route';
 
@@ -15,6 +16,7 @@ initialConfig(app);
 // -------- routes --------
 app.use('/api', userRouter);
 app.use('/api', postRouter);
+app.use('/api', commentRouter);
 
 app.use(notFound);
 app.use(handleErrorRequest);
