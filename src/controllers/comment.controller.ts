@@ -76,3 +76,29 @@ export const getComments = catchAsyncError<
 
   return res.json({ total: comments.length, comments });
 });
+
+export const editComment = catchAsyncError<
+  { id: string },
+  unknown,
+  { comment?: string }
+>(async (req, res, next) => {
+  const commentId = req.params.id;
+  const { comment } = req.body;
+  if (!comment) {
+    return next(new CustomError("Comment can't be empty"));
+  }
+
+  const [updatedComment] = await db
+    .update(Comments)
+    .set({ comment: comment.trim() })
+    .where(and(eq(Comments.id, commentId), eq(Comments.userId, req.user.id)))
+    .returning();
+
+  if (!updatedComment) {
+    return next(
+      new CustomError("Comment doesn't exist or comment doesn't belong to you")
+    );
+  }
+
+  return res.json({ comment: updatedComment });
+});
