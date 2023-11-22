@@ -102,3 +102,24 @@ export const editComment = catchAsyncError<
 
   return res.json({ comment: updatedComment });
 });
+
+export const deleteComment = catchAsyncError<{ id: string }>(
+  async (req, res, next) => {
+    const commentId = req.params.id;
+
+    const [comment] = await db
+      .delete(Comments)
+      .where(and(eq(Comments.id, commentId), eq(Comments.userId, req.user.id)))
+      .returning({ id: Comments.id });
+
+    if (!comment) {
+      return next(
+        new CustomError(
+          "Comment doesn't exist or comment doesn't belong to you"
+        )
+      );
+    }
+
+    return res.json({ message: 'Comment deleted successfully' });
+  }
+);

@@ -1,4 +1,5 @@
 import {
+  deleteComment,
   editComment,
   getComments,
   postComment
@@ -11,4 +12,5 @@ router.post('/comment', isAuthenticatedUser, postComment);
 router
   .route('/comment/:id')
   .get(getComments)
-  .put(isAuthenticatedUser, editComment);
+  .put(isAuthenticatedUser, editComment)
+  .delete(isAuthenticatedUser, deleteComment);
