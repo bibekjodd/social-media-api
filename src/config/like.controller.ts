@@ -1,10 +1,10 @@
-import { catchAsyncError } from '@/middlewares/catch-async-error';
-import { db } from './database';
-import { Likes } from '@/schema/like.schema';
-import { and, eq } from 'drizzle-orm';
 import { CustomError } from '@/lib/custom-error';
-import { Posts } from '@/schema/post.schema';
+import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Comments } from '@/schema/comment.schema';
+import { Likes } from '@/schema/like.schema';
+import { Posts } from '@/schema/post.schema';
+import { and, eq } from 'drizzle-orm';
+import { db } from './database';
 
 export const toggleLikeOnPostOrComment = catchAsyncError<
   { id: string },
