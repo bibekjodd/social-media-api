@@ -1,10 +1,30 @@
 import { CustomError } from '@/lib/custom-error';
+import { selectLikeSnapshot, selectUserSnapshot } from '@/lib/query-utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Comments } from '@/schema/comment.schema';
 import { Likes } from '@/schema/like.schema';
 import { Posts } from '@/schema/post.schema';
+import { Users } from '@/schema/user.schema';
 import { and, eq } from 'drizzle-orm';
 import { db } from './database';
+
+export const getLikesFromPostOrComment = catchAsyncError<
+  { id: string },
+  unknown,
+  unknown,
+  { isPost?: 'true' }
+>(async (req, res) => {
+  const postOrCommentId = req.params.id;
+  const isPost = req.query.isPost === 'true';
+
+  const likes = await db
+    .select({ ...selectLikeSnapshot, user: selectUserSnapshot })
+    .from(Likes)
+    .where(eq(isPost ? Likes.postId : Likes.commentId, postOrCommentId))
+    .leftJoin(Users, eq(Likes.userId, Users.id));
+
+  return res.json({ total: likes.length, likes });
+});
 
 export const toggleLikeOnPostOrComment = catchAsyncError<
   { id: string },

@@ -3,23 +3,21 @@ import { CustomError } from '@/lib/custom-error';
 import { selectCommentSnapshot, selectUserSnapshot } from '@/lib/query-utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Comments } from '@/schema/comment.schema';
+import { Likes } from '@/schema/like.schema';
 import { Users } from '@/schema/user.schema';
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 
-type PostCommentBody = {
-  comment?: string;
-};
-type PostCommentQuery = { postId?: string; parentCommentId?: string };
 export const postComment = catchAsyncError<
+  { id: string },
   unknown,
-  unknown,
-  PostCommentBody,
-  PostCommentQuery
+  { comment?: string },
+  { parentCommentId?: string }
 >(async (req, res, next) => {
+  const postId = req.params.id;
   const { comment } = req.body;
-  const { parentCommentId, postId } = req.query;
+  const { parentCommentId } = req.query;
   if (!comment) return next(new CustomError("Comment can't be empty"));
-  if (!postId) return next(new CustomError('Post id is not provided'));
 
   const [createdComment] = await db
     .insert(Comments)
@@ -27,7 +25,7 @@ export const postComment = catchAsyncError<
       comment: comment.trim(),
       postId,
       userId: req.user.id,
-      parentCommentId
+      parentCommentId: parentCommentId || null
     })
     .returning();
 
@@ -56,8 +54,14 @@ export const getComments = catchAsyncError<
   if (limit < 1 || limit > 20) limit = 10;
   const offset = (page - 1) * limit;
 
+  const Replies = alias(Comments, 'replies');
   const comments = await db
-    .select({ ...selectCommentSnapshot, user: selectUserSnapshot })
+    .select({
+      ...selectCommentSnapshot,
+      totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
+      totalComments: sql<number>`cast(count(distinct(${Replies.id})) as int)`,
+      user: selectUserSnapshot
+    })
     .from(Comments)
     .where(
       and(
@@ -72,7 +76,10 @@ export const getComments = catchAsyncError<
     .orderBy(
       parentCommentId ? asc(Comments.createdAt) : desc(Comments.createdAt)
     )
-    .leftJoin(Users, eq(Comments.userId, Users.id));
+    .leftJoin(Users, eq(Comments.userId, Users.id))
+    .leftJoin(Likes, eq(Likes.commentId, Comments.id))
+    .leftJoin(Replies, eq(Comments.id, Replies.parentCommentId))
+    .groupBy(Comments.id, Users.id);
 
   return res.json({ total: comments.length, comments });
 });

@@ -2,9 +2,11 @@ import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
 import { validateImageUrl } from '@/lib/validators';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
+import { Comments } from '@/schema/comment.schema';
+import { Likes } from '@/schema/like.schema';
 import { Posts } from '@/schema/post.schema';
 import { Users } from '@/schema/user.schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 
 type GetPostsQuery = {
   page?: string;
@@ -37,13 +39,18 @@ export const getPosts = catchAsyncError<
         name: Users.name,
         email: Users.email,
         image: Users.image
-      }
+      },
+      totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
+      totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`
     })
     .from(Posts)
     .leftJoin(Users, eq(Posts.userId, Users.id))
+    .leftJoin(Likes, eq(Posts.id, Likes.postId))
+    .leftJoin(Comments, eq(Posts.id, Comments.postId))
     .limit(pageSize)
     .offset(offset)
-    .orderBy(desc(Posts.createdAt));
+    .orderBy(desc(Posts.createdAt))
+    .groupBy(Posts.id, Users.id);
 
   if (!userId) {
     const posts = await query;
@@ -93,14 +100,18 @@ export const getPostDetails = catchAsyncError<{ id: string }>(
           name: Users.name,
           email: Users.email,
           image: Users.image
-        }
+        },
+        totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
+        totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`
       })
       .from(Posts)
       .where(eq(Posts.id, postId))
-      .leftJoin(Users, eq(Posts.userId, Users.id));
+      .leftJoin(Users, eq(Posts.userId, Users.id))
+      .leftJoin(Likes, eq(Posts.id, Likes.postId))
+      .leftJoin(Comments, eq(Posts.id, Comments.postId))
+      .groupBy(Posts.id, Users.id);
 
     if (!post) return next(new CustomError('Post not found'));
-
     return res.json({ post });
   }
 );
