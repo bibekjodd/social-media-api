@@ -1,10 +1,10 @@
 import { createId } from '@paralleldrive/cuid2';
 import {
   foreignKey,
+  index,
   pgTable,
   text,
-  timestamp,
-  unique
+  timestamp
 } from 'drizzle-orm/pg-core';
 import { Posts } from './post.schema';
 import { Users } from './user.schema';
@@ -42,9 +42,9 @@ export const Comments = pgTable(
         foreignColumns: [table.id]
       }).onDelete('cascade'),
 
-      userIdIndex: unique('idx_userId').on(table.userId),
-      postidIndex: unique('idx_postid').on(table.postId),
-      parentCommentIdIndex: unique('idx_parentCommentId').on(
+      userIdIndex: index('idx_userId').on(table.userId),
+      postIdIndex: index('idx_postId').on(table.postId),
+      parentCommentIdIndex: index('idx_parentCommentId').on(
         table.parentCommentId
       )
     };
