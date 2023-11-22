@@ -10,7 +10,7 @@ import { Router } from 'express';
 
 export const router = Router();
 router.get('/posts', getPosts);
-router.post('/create-post', isAuthenticatedUser, createPost);
+router.post('/post', isAuthenticatedUser, createPost);
 router
   .route('/post/:id')
   .get(getPostDetails)

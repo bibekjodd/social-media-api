@@ -18,6 +18,8 @@ const envSchema = z.object({
   SMTP_MAIL: z.string().readonly(),
   SMTP_PASS: z.string().readonly(),
 
+  FRONTEND_URLS: z.string().readonly().optional(),
+
   PORT: z.string().optional().readonly()
 });
 export const env = envSchema.parse(process.env);
