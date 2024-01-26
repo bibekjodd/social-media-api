@@ -49,3 +49,17 @@ export const likes = pgTable(
   }
 );
 export type Like = typeof likes.$inferSelect;
+export const selectLikeSnapshot = {
+  id: likes.id,
+  postId: likes.postId,
+  commentId: likes.commentId,
+  createdAt: likes.createdAt,
+  userId: likes.userId
+};
+export type LikeSnapshot = {
+  id: string;
+  postId: string | null;
+  commentId: string | null;
+  createdAt: string;
+  userId: string;
+};
