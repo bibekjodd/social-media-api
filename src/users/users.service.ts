@@ -1,7 +1,6 @@
 import { db } from '@/config/database';
 import { sendResetPasswordMail } from '@/lib/send-mail';
 import { generateResetPasswordToken } from '@/lib/utils';
-import { validateImageUrl } from '@/lib/validators';
 import { UserSnapshot, selectUserSnapshot, users } from '@/schemas/user.schema';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { compare, hash } from 'bcryptjs';
@@ -56,19 +55,9 @@ export class UsersService {
     userId: string,
     data: UpdateProfileSchema
   ): Promise<{ user: UserSnapshot }> {
-    const { name, email, image } = data;
-    if (!name && !email && !image) {
-      throw new BadRequestException('Incomplete data provided');
-    }
-    validateImageUrl(image);
-
     const [user] = await db
       .update(users)
-      .set({
-        name: name || undefined,
-        email: email || undefined,
-        image: image || undefined
-      })
+      .set(data)
       .where(eq(users.id, userId))
       .returning(selectUserSnapshot);
 

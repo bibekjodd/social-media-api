@@ -17,7 +17,7 @@ export const posts = pgTable(
       .$defaultFn(() => createId()),
     caption: text('caption'),
     image: text('image'),
-    userId: text('userId').notNull(),
+    authorId: text('author_id').notNull(),
     createdAt: timestamp('created_at', { mode: 'string' })
       .notNull()
       .defaultNow()
@@ -25,13 +25,27 @@ export const posts = pgTable(
   function constaints(table) {
     return {
       userReference: foreignKey({
-        name: 'fk_user_id',
-        columns: [table.userId],
+        name: 'fk_author_id',
+        columns: [table.authorId],
         foreignColumns: [users.id]
       }).onDelete('cascade'),
 
-      userIdIndex: index('posts_idx_user_id').on(table.userId)
+      userIdIndex: index('posts_idx_author_id').on(table.authorId)
     };
   }
 );
 export type Post = typeof posts.$inferSelect;
+export const selectPostSnapshot = {
+  id: posts.id,
+  caption: posts.caption,
+  image: posts.image,
+  authorId: posts.authorId,
+  createdAt: posts.createdAt
+};
+export type PostSnapshot = {
+  id: string;
+  caption: string | null;
+  image: string | null;
+  authorId: string;
+  createdAt: string;
+};

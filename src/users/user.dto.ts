@@ -1,41 +1,51 @@
 import { z } from 'zod';
 
+const imageRegExp = new RegExp(`(https?://.*.(png|gif|webp|jpeg|jpg))`);
+export const imageSchema = z
+  .string({ invalid_type_error: 'Invalid image url' })
+  .regex(imageRegExp, 'invalid image url')
+  .max(100, 'Too long image uri');
+const nameSchema = z
+  .string()
+  .min(5, 'Name must be at least 5 characters')
+  .max(30, "Name can't exceed 30 characters");
+const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(20, "Password can't exceed 20 characters");
+
 export const registerUserSchema = z.object({
-  name: z
-    .string()
-    .min(5, 'Name must be at least 5 characters')
-    .max(30, "Name can't exceed 30 characters"),
+  name: nameSchema,
   email: z.string().email(),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(20, "Password can't exceed 20 characters"),
-  image: z.string().max(200, 'Too long image uri')
+  password: passwordSchema,
+  image: imageSchema.optional()
 });
 export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
 
-export const updateProfileSchema = z.object({
-  name: z
-    .string()
-    .min(5, 'Name must be at least 5 characters')
-    .max(30, "Name can't exceed 30 characters")
-    .optional(),
-  email: z.string().email().optional(),
-  image: z.string().max(200, 'Too long image uri')
-});
+export const updateProfileSchema = z
+  .object({
+    name: nameSchema,
+    email: z.string().email().optional(),
+    image: imageSchema.optional()
+  })
+  .refine((data) => {
+    if (!data.name && !data.email && !data.image) return false;
+    return true;
+  }, 'Incomplete data provided');
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
 
-export const updatePasswordSchema = z.object({
-  oldPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(20, "Password can't exceed 20 characters"),
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(20, "Password can't exceed 20 characters"),
-  passwordResetPageUrl: z.string().optional()
-});
+export const updatePasswordSchema = z
+  .object({
+    oldPassword: passwordSchema,
+    newPassword: passwordSchema,
+    passwordResetPageUrl: z.string().optional()
+  })
+  .refine((data) => {
+    if (data.oldPassword === data.newPassword) {
+      return false;
+    }
+    return true;
+  }, "Old and new passwords can't be the same");
 export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>;
 
 export const forgotPasswordSchema = z.object({
@@ -49,9 +59,6 @@ export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z.object({
   token: z.string(),
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(20, "Password can't exceed 20 characters")
+  newPassword: passwordSchema
 });
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
