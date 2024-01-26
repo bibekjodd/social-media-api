@@ -19,15 +19,31 @@ export const comparePassword = async (
 };
 
 export const cookieOptions: CookieOptions = {
-  expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-  sameSite: 'none',
-  secure: false,
-  httpOnly: true
+  maxAge: Date.now() + 200 * 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: env.NODE_ENV !== 'production' ? false : true,
+  sameSite: env.NODE_ENV !== 'production' ? 'lax' : 'none'
 };
 
 export const generateCookieToken = (id: string): string => {
   const token = jwt.sign({ id }, env.JWT_SECRET);
   return token;
+};
+
+export const decodeCookieToken = (
+  token: string | undefined
+): string | undefined => {
+  if (!token) return undefined;
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as
+      | { id?: string }
+      | undefined;
+
+    if (typeof decoded?.id === 'string') return decoded.id;
+    return undefined;
+  } catch (err) {
+    return undefined;
+  }
 };
 
 export const filterUser = (user: User) => {

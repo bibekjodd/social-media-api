@@ -23,7 +23,9 @@ export const searchUsers = catchAsyncError<
   { q?: string; limit?: string }
 >(async (req, res) => {
   const q = `%${req.query.q || ''}%`;
-  const limit = Number(req.query.limit) || 10;
+  let limit = Number(req.query.limit) || 10;
+  if (limit > 50) limit = 50;
+  if (limit < 1) limit = 10;
 
   const users = await db
     .select({
@@ -102,6 +104,12 @@ export const loginUser = catchAsyncError<unknown, unknown, LoginUserBody>(
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
   return res.json({ user: filterUser(req.user) });
+});
+
+export const logoutUser = catchAsyncError(async (req, res) => {
+  return res
+    .clearCookie('token', cookieOptions)
+    .json({ message: 'User logged out successfully!' });
 });
 
 type UpdateProfileBody = {

@@ -1,6 +1,7 @@
 import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
-import { selectCommentSnapshot, selectUserSnapshot } from '@/lib/query-utils';
+import { commentSnapshot, userSnapshot } from '@/lib/select-snapshots';
+import { decodeCookieToken } from '@/lib/utils';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Comments } from '@/schema/comment.schema';
 import { Likes } from '@/schema/like.schema';
@@ -48,19 +49,28 @@ export const getComments = catchAsyncError<
 >(async (req, res) => {
   const postId = req.params.id;
   const parentCommentId = req.query.parentCommentId;
+  const userId = decodeCookieToken(req.cookies?.token);
   let page = Number(req.query.page) || 1;
   if (page < 1) page = 1;
-  let limit = Number(req.query.pageSize) || 10;
-  if (limit < 1 || limit > 20) limit = 10;
-  const offset = (page - 1) * limit;
+  let pageSize = Number(req.query.pageSize) || 10;
+  if (pageSize < 1 || pageSize > 20) pageSize = 10;
+  const offset = (page - 1) * pageSize;
 
   const Replies = alias(Comments, 'replies');
-  const comments = await db
+  let comments = await db
     .select({
-      ...selectCommentSnapshot,
+      ...commentSnapshot,
       totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
-      totalComments: sql<number>`cast(count(distinct(${Replies.id})) as int)`,
-      user: selectUserSnapshot
+      totalReplies: sql<number>`cast(count(distinct(${Replies.id})) as int)`,
+      hasLiked: !userId
+        ? sql<boolean>`false`
+        : sql<number>`cast(count(distinct(
+        case
+          when ${userId}=${Likes.userId} then 1
+          else null
+          end
+      )) as int)`,
+      user: userSnapshot
     })
     .from(Comments)
     .where(
@@ -71,7 +81,7 @@ export const getComments = catchAsyncError<
           : isNull(Comments.parentCommentId)
       )
     )
-    .limit(limit)
+    .limit(pageSize)
     .offset(offset)
     .orderBy(
       parentCommentId ? asc(Comments.createdAt) : desc(Comments.createdAt)
@@ -81,6 +91,10 @@ export const getComments = catchAsyncError<
     .leftJoin(Replies, eq(Comments.id, Replies.parentCommentId))
     .groupBy(Comments.id, Users.id);
 
+  comments = comments.map((comment) => ({
+    ...comment,
+    hasLiked: !!comment.hasLiked
+  }));
   return res.json({ total: comments.length, comments });
 });
 

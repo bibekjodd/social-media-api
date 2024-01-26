@@ -1,12 +1,14 @@
 import { db } from '@/config/database';
 import { CustomError } from '@/lib/custom-error';
+import { userSnapshot } from '@/lib/select-snapshots';
+import { decodeCookieToken } from '@/lib/utils';
 import { validateImageUrl } from '@/lib/validators';
 import { catchAsyncError } from '@/middlewares/catch-async-error';
 import { Comments } from '@/schema/comment.schema';
 import { Likes } from '@/schema/like.schema';
 import { Posts } from '@/schema/post.schema';
 import { Users } from '@/schema/user.schema';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 type GetPostsQuery = {
   page?: string;
@@ -25,8 +27,8 @@ export const getPosts = catchAsyncError<
   if (pageSize < 1) pageSize = 1;
   if (pageSize > 50) pageSize = 20;
   const offset = (page - 1) * pageSize;
-
-  const userId = req.query.userId;
+  const userId = decodeCookieToken(req.cookies?.token);
+  const postAuthorId = req.query.userId;
 
   const query = db
     .select({
@@ -34,14 +36,17 @@ export const getPosts = catchAsyncError<
       caption: Posts.caption,
       image: Posts.image,
       createdAt: Posts.createdAt,
-      author: {
-        id: Users.id,
-        name: Users.name,
-        email: Users.email,
-        image: Users.image
-      },
+      author: userSnapshot,
       totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
-      totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`
+      totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`,
+      hasLiked: !userId
+        ? sql<boolean>`false`
+        : sql<number>`cast(count(distinct(
+        case
+          when ${userId}=${Likes.userId} then 1
+          else null
+        end
+      )) as int)`
     })
     .from(Posts)
     .leftJoin(Users, eq(Posts.userId, Users.id))
@@ -52,12 +57,13 @@ export const getPosts = catchAsyncError<
     .orderBy(desc(Posts.createdAt))
     .groupBy(Posts.id, Users.id);
 
-  if (!userId) {
-    const posts = await query;
-    return res.json({ total: posts.length, posts });
+  let posts: undefined | Awaited<typeof query> = undefined;
+  if (!postAuthorId) {
+    posts = await query;
+  } else {
+    posts = await query.where(eq(Posts.userId, postAuthorId));
   }
-
-  const posts = await query.where(eq(Posts.userId, userId));
+  posts = posts.map((post) => ({ ...post, hasLiked: !!post.hasLiked }));
   return res.json({ total: posts.length, posts });
 });
 
@@ -89,29 +95,37 @@ export const createPost = catchAsyncError<unknown, unknown, CreatePostBody>(
 export const getPostDetails = catchAsyncError<{ id: string }>(
   async (req, res, next) => {
     const postId = req.params.id;
+    const userId = decodeCookieToken(req.cookies?.token);
     const [post] = await db
       .select({
         id: Posts.id,
         caption: Posts.caption,
         image: Posts.image,
         createdAt: Posts.createdAt,
-        user: {
-          id: Users.id,
-          name: Users.name,
-          email: Users.email,
-          image: Users.image
-        },
+        author: userSnapshot,
         totalLikes: sql<number>`cast(count(distinct(${Likes.id})) as int)`,
-        totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`
+        totalComments: sql<number>`cast(count(distinct(${Comments.id})) as int)`,
+        hasLiked: !userId
+          ? sql<boolean>`false`
+          : sql<number>`cast(count(distinct(
+          case
+            when ${userId}=${Likes.userId} then 1
+            else null
+          end
+        )) as int)`
       })
       .from(Posts)
       .where(eq(Posts.id, postId))
       .leftJoin(Users, eq(Posts.userId, Users.id))
       .leftJoin(Likes, eq(Posts.id, Likes.postId))
-      .leftJoin(Comments, eq(Posts.id, Comments.postId))
+      .leftJoin(
+        Comments,
+        and(eq(Posts.id, Comments.postId), isNull(Comments.parentCommentId))
+      )
       .groupBy(Posts.id, Users.id);
 
     if (!post) return next(new CustomError('Post not found'));
+    post.hasLiked = !!post.hasLiked;
     return res.json({ post });
   }
 );

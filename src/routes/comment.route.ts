@@ -8,9 +8,9 @@ import { isAuthenticatedUser } from '@/middlewares/auth';
 import { Router } from 'express';
 
 export const router = Router();
+router.route('/comments/:id').get(getComments);
 router
   .route('/comment/:id')
-  .get(getComments)
   .post(isAuthenticatedUser, postComment)
   .put(isAuthenticatedUser, editComment)
   .delete(isAuthenticatedUser, deleteComment);

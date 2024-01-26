@@ -3,6 +3,7 @@ import {
   forgotPassword,
   getUserProfile,
   loginUser,
+  logoutUser,
   registerUser,
   resetPassword,
   searchUsers,
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get('/search', searchUsers);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.get('/logout', logoutUser);
 router
   .route('/profile')
   .get(isAuthenticatedUser, getUserProfile)
