@@ -51,3 +51,11 @@ export const comments = pgTable(
   }
 );
 export type Comment = typeof comments.$inferSelect;
+export const selectCommentSnapshot = {
+  id: comments.id,
+  comment: comments.comment,
+  userId: comments.userId,
+  postId: comments.postId,
+  parentCommentId: comments.parentCommentId,
+  createdAt: comments.createdAt
+};
