@@ -13,6 +13,7 @@ import {
   Req,
   UseGuards
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
   CreatePostSchema,
@@ -26,14 +27,16 @@ import { PostsService } from './posts.service';
 export class PostsController {
   constructor(private postsService: PostsService) {}
 
+  @ApiTags('Query Posts')
   @Get('posts')
   getPosts(
     @Req() req: Request,
     @Query(new ZodValidationPipe(postsQuerySchema)) query: PostsQuerySchema
   ) {
-    return this.postsService.getPosts(query, req.user.id);
+    return this.postsService.getPosts(query, req.user?.id);
   }
 
+  @ApiTags('Create post')
   @Post('post')
   @UseGuards(AuthenticatedGuard)
   createPost(
@@ -43,11 +46,13 @@ export class PostsController {
     return this.postsService.createPost(body, req.user.id);
   }
 
+  @ApiTags('Get post details')
   @Get('post/:id')
   getPost(@Req() req: Request, @Param('id') postId: string) {
     return this.postsService.getPost(postId, req.user?.id);
   }
 
+  @ApiTags('Update Post')
   @Put('post/:id')
   @UseGuards(AuthenticatedGuard)
   updatePost(
@@ -58,6 +63,7 @@ export class PostsController {
     return this.postsService.updatePost(postId, req.user.id, body);
   }
 
+  @ApiTags('Delete Post')
   @Delete('post/:id')
   @UseGuards(AuthenticatedGuard)
   deletePost(@Param('id') postId: string, @Req() req: Request) {
