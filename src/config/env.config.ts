@@ -8,6 +8,8 @@ const envSchema = z.object({
     .readonly(),
   PORT: z.string().default('5000').readonly(),
   DATABASE_URL: z.string().readonly(),
+  SESSION_SECRET: z.string().readonly(),
+  MONGO_URI: z.string().readonly(),
   FRONTEND_URLS: z
     .string()
     .optional()

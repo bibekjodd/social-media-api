@@ -25,3 +25,8 @@ export const users = pgTable(
   }
 );
 export type User = typeof users.$inferSelect;
+export type SelectUser = typeof users.$inferSelect;
+export type UserSnapshot = Omit<
+  SelectUser,
+  'password' | 'resetPasswordToken' | 'resetPasswordExpire'
+>;

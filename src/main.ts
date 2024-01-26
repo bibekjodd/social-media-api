@@ -1,13 +1,19 @@
 import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
+import session from 'express-session';
+import passport from 'passport';
 import { AppModule } from './app.module';
 import { env, validateEnv } from './config/env.config';
+import { sessionOptions } from './lib/utils';
 
 async function bootstrap() {
   validateEnv();
-  const adapter = new ExpressAdapter();
-  const app = await NestFactory.create(AppModule, adapter);
+  const app = await NestFactory.create(AppModule);
+  app.use(session(sessionOptions));
+  app.use(passport.initialize());
+  app.use(passport.session());
   app.enableCors({ origin: env.FRONTEND_URLS, credentials: true });
+
+  //
   await app.listen(env.PORT, () => {
     console.log(`Server listening at http://localhost:${env.PORT}`);
   });
