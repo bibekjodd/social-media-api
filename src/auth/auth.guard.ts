@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -14,8 +19,11 @@ export class LocalAuthGuard extends AuthGuard('local') {
 
 @Injectable()
 export class AuthenticatedGuard implements CanActivate {
-  canActivate(context: ExecutionContext) {
+  canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
-    return req.isAuthenticated();
+    if (!req.isAuthenticated() || !req.user) {
+      throw new UnauthorizedException('User is not authenticated');
+    }
+    return true;
   }
 }

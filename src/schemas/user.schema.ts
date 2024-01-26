@@ -30,3 +30,10 @@ export type UserSnapshot = Omit<
   SelectUser,
   'password' | 'resetPasswordToken' | 'resetPasswordExpire'
 >;
+export const selectUserSnapshot = {
+  id: users.id,
+  name: users.name,
+  email: users.email,
+  image: users.image,
+  createdAt: users.createdAt
+};

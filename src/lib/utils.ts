@@ -1,5 +1,5 @@
 import { env } from '@/config/env.config';
-import { users } from '@/schemas/user.schema';
+import crypto from 'crypto';
 import MongoStore from 'connect-mongo';
 import { SessionOptions } from 'express-session';
 
@@ -17,10 +17,18 @@ export const sessionOptions: SessionOptions = {
   proxy: true
 };
 
-export const selectUserSnapshot = {
-  id: users.id,
-  name: users.name,
-  email: users.email,
-  image: users.image,
-  createdAt: users.createdAt
+export const generateResetPasswordToken = (): {
+  token: string;
+  resetPasswordToken: string;
+  resetPasswordExpire: string;
+} => {
+  const token = crypto.randomBytes(20).toString('hex');
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  const resetPasswordExpire = new Date(
+    Date.now() + 15 * 60 * 1000
+  ).toISOString();
+  return { token, resetPasswordToken, resetPasswordExpire };
 };

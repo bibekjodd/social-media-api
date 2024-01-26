@@ -13,7 +13,10 @@ const envSchema = z.object({
   FRONTEND_URLS: z
     .string()
     .optional()
-    .transform((data) => (data || '').split(' '))
+    .transform((data) => (data || '').split(' ')),
+  SMTP_SERVICE: z.string().readonly(),
+  SMTP_MAIL: z.string().readonly(),
+  SMTP_PASS: z.string().readonly()
 });
 
 export type EnvType = z.infer<typeof envSchema>;
