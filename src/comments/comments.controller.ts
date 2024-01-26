@@ -61,6 +61,7 @@ export class CommentsController {
     });
   }
 
+  @ApiTags('Edit comment')
   @Put('comment/:id')
   @UseGuards(AuthenticatedGuard)
   editComment(
@@ -75,6 +76,7 @@ export class CommentsController {
     });
   }
 
+  @ApiTags('Delete comment')
   @Delete('comment/:id')
   @UseGuards(AuthenticatedGuard)
   deleteComment(@Req() req: Request, @Param('id') commentId: string) {
