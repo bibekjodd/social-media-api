@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const commentSchema = z
   .string()
-  .max(200, 'Too long comment')
+  .max(300, 'Too long comment')
   .min(1, "Comment can't be empty")
   .transform((value) => value.trim());
 

@@ -4,7 +4,8 @@ import {
   index,
   pgTable,
   text,
-  timestamp
+  timestamp,
+  varchar
 } from 'drizzle-orm/pg-core';
 import { users } from './user.schema';
 
@@ -15,8 +16,8 @@ export const posts = pgTable(
       .notNull()
       .primaryKey()
       .$defaultFn(() => createId()),
-    caption: text('caption'),
-    image: text('image'),
+    caption: varchar('caption', { length: 500 }),
+    image: varchar('image', { length: 200 }),
     authorId: text('author_id').notNull(),
     createdAt: timestamp('created_at', { mode: 'string' })
       .notNull()

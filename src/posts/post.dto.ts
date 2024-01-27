@@ -24,7 +24,7 @@ export type PostsQuerySchema = z.infer<typeof postsQuerySchema>;
 
 export const createPostSchema = z
   .object({
-    caption: z.string().optional(),
+    caption: z.string().trim().max(500, 'Too long caption').optional(),
     image: imageSchema.optional()
   })
   .refine((data) => {

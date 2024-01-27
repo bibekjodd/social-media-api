@@ -3,16 +3,19 @@ import { z } from 'zod';
 const imageRegExp = new RegExp(`(https?://.*.(png|gif|webp|jpeg|jpg))`);
 export const imageSchema = z
   .string({ invalid_type_error: 'Invalid image url' })
+  .trim()
   .regex(imageRegExp, 'invalid image url')
   .max(100, 'Too long image uri');
 const nameSchema = z
   .string()
   .min(5, 'Name must be at least 5 characters')
-  .max(30, "Name can't exceed 30 characters");
+  .max(30, "Name can't exceed 30 characters")
+  .trim();
 const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
-  .max(20, "Password can't exceed 20 characters");
+  .max(20, "Password can't exceed 20 characters")
+  .trim();
 
 export const registerUserSchema = z.object({
   name: nameSchema,
@@ -52,6 +55,7 @@ export const forgotPasswordSchema = z.object({
   email: z.string().email(),
   passwordResetPageUrl: z
     .string()
+    .trim()
     .optional()
     .transform((data) => data || 'http://localhost:5000/api/password/reset')
 });

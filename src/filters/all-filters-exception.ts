@@ -40,6 +40,7 @@ export class AllFiltersException extends BaseExceptionFilter {
       const issue = exception.issues[0];
       if (issue) {
         message = `${issue.path}: ${issue.message}`;
+        if (message.startsWith(': ')) message = message.slice(2);
       }
     }
 

@@ -1,5 +1,12 @@
 import { createId } from '@paralleldrive/cuid2';
-import { date, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  date,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  varchar
+} from 'drizzle-orm/pg-core';
 
 export const users = pgTable(
   'users',
@@ -8,10 +15,10 @@ export const users = pgTable(
       .notNull()
       .primaryKey()
       .$defaultFn(() => createId()),
-    name: text('name').notNull(),
-    email: text('email').notNull(),
+    name: varchar('name', { length: 30 }).notNull(),
+    email: varchar('email', { length: 40 }).notNull(),
     password: text('password').notNull(),
-    image: text('image'),
+    image: varchar('image', { length: 200 }),
     resetPasswordToken: text('reset_password_token'),
     resetPasswordExpire: date('reset_password_expire', { mode: 'string' }),
     createdAt: timestamp('created_at', { mode: 'string' })

@@ -4,7 +4,8 @@ import {
   index,
   pgTable,
   text,
-  timestamp
+  timestamp,
+  varchar
 } from 'drizzle-orm/pg-core';
 import { posts } from './post.schema';
 import { users } from './user.schema';
@@ -16,7 +17,7 @@ export const comments = pgTable(
       .notNull()
       .primaryKey()
       .$defaultFn(() => createId()),
-    comment: text('comment').notNull(),
+    comment: varchar('comment', { length: 300 }).notNull(),
     userId: text('user_id').notNull(),
     postId: text('post_id').notNull(),
     parentCommentId: text('parent_comment_id'),
